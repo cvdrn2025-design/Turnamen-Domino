@@ -1,0 +1,56 @@
+{
+  "name": "Turnamen Domino - Piala Walikota Samarinda Cup 2026",
+  "short_name": "Domino Samarinda",
+  "description": "Aplikasi panitia & peserta Turnamen Domino Piala Walikota Samarinda Cup 2026. Fitur: pendaftaran, drawing bracket, input skor real-time, dan klasemen juara.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1a2e",
+  "theme_color": "#d32f2f",
+  "lang": "id",
+  "dir": "ltr",
+  "categories": ["sports", "entertainment", "utilities"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Bracket Live",
+      "short_name": "Bracket",
+      "description": "Lihat bagan pertandingan terkini",
+      "url": "./index.html?tab=bracket",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Podium Juara",
+      "short_name": "Juara",
+      "description": "Lihat juara turnamen",
+      "url": "./index.html?tab=juara",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
