@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnamen Domino - Piala Walikota Samarinda Cup 2026</title>
+    <style>
+        :root {
+            --primary: #d32f2f;
+            --secondary: #ffc107;
+            --dark: #212121;
+            --light: #f5f5f5;
+            --success: #388e3c;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           HALAMAN INTRO
+           ============================================ */
+        #introPage {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #introPage.hidden-intro {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%; height: 100%;
+            top: 0; left: 0;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255, 193, 7, 0.15);
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+        }
+
+        .intro-content {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 1s ease-out;
+            width: 100%;
+            max-width: 500px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- LOGO DIPERBESAR (TANPA LINGKARAN) --- */
+        .logo-container {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo-container img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 25px rgba(255, 193, 7, 0.7));
+            animation: logoPulse 2.5s ease-in-out infinite;
+        }
+        .logo-fallback {
+            font-size: 120px;
+            animation: logoPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .intro-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #ffc107, #ff9800, #ffc107);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+        .intro-subtitle {
+            font-size: 1rem;
+            color: #ffc107;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .intro-year {
+            font-size: 0.85rem;
+            color: #ccc;
+            margin-bottom: 40px;
+            letter-spacing: 3px;
+        }
+
+        .btn-masuk {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white;
+            border: 2px solid #ffc107;
+            padding: 15px 40px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(211, 47, 47, 0.5);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 10;
+        }
+        .btn-masuk img {
+            width: 28px;
+            height: auto;
+            vertical-align: middle;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+        }
+        .btn-masuk:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 193, 7, 0.6);
+        }
+        .btn-masuk:active { transform: translateY(0) scale(0.98); }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #aaa;
+            display: none;
+        }
+
+        /* --- KARTU DOMINO ASLI (GAMBAR PNG) --- */
+        .domino-img {
+            position: absolute;
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.6));
+            width: 60px;
+            height: auto;
+            aspect-ratio: 9 / 16;
+            object-fit: contain;
+        }
+
+        @keyframes flyIn1 {
+            0% { opacity: 0; transform: translate(-400px, -300px) rotate(-720deg) scale(0.3); }
+            60% { opacity: 1; transform: translate(20px, 20px) rotate(20deg) scale(1.1); }
+            80% { transform: translate(-5px, -5px) rotate(-10deg) scale(1); }
+            100% { opacity: 1; transform: translate(0, 0) rotate(18deg) scale(1); }
+        }
+        @keyframes flyIn2 {
+            0% { opacity: 0; transform: translate(400px, -250px) rotate(720deg) scale(0.3); }
+            60% { opacity: 1; transform: translate(-20px, 20px) rotate(-20deg) scale(1.1); }
+            80% { transform: translate(5px, -5px) rotate(10deg) scale(1); }
+            100% { opacity: 1; transform: translate(0, 0) rotate(-22deg) scale(1); }
+        }
+        @keyframes flyIn3 {
+            0% { opacity: 0; transform: translate(0, 500px) rotate(1080deg) scale(0.3); }
+            60% { opacity: 1; transform: translate(0, -30px) rotate(-15deg) scale(1.1); }
+            80% { transform: translate(0, 10px) rotate(5deg) scale(1); }
+            100% { opacity: 1; transform: translate(0, 0) rotate(-12deg) scale(1); }
+        }
+        @keyframes flyIn4 {
+            0% { opacity: 0; transform: translate(-500px, 300px) rotate(900deg) scale(0.3); }
+            60% { opacity: 1; transform: translate(30px, -20px) rotate(-25deg) scale(1.1); }
+            80% { transform: translate(-10px, 5px) rotate(8deg) scale(1); }
+            100% { opacity: 1; transform: translate(0, 0) rotate(25deg) scale(1); }
+        }
+
+        .kartu-1 { animation: flyIn1 1.2s ease-out 0.3s forwards; top: 12%; left: 6%; }
+        .kartu-2 { animation: flyIn2 1.2s ease-out 0.5s forwards; top: 10%; right: 6%; }
+        .kartu-3 { animation: flyIn3 1.2s ease-out 0.7s forwards; bottom: 10%; left: 10%; }
+        .kartu-4 { animation: flyIn4 1.2s ease-out 0.9s forwards; bottom: 8%; right: 8%; }
+
+        /* ============================================
+           APLIKASI TURNAMEN
+           ============================================ */
+        #appPage {
+            display: none;
+            min-height: 100vh;
+            background-color: var(--light);
+        }
+        #appPage.active { display: block; }
+
+        header.app-header {
+            position: relative;
+            width: 100%;
+            background-color: var(--primary);
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .header-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+        .btn-home {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-home:hover {
+            background-color: #fff;
+            transform: scale(1.05);
+        }
+
+        nav.app-nav {
+            display: flex;
+            gap: 5px;
+            background: white;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        nav.app-nav button {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            white-space: nowrap;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+        nav.app-nav button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 5px; font-size: 1.2rem;}
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem;}
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem;}
+        .btn:hover { opacity: 0.9; }
+        .btn-success { background: var(--success); }
+        .btn-full { width: 100%; }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 10px;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 400px;}
+        th, td { border: 1px solid #ddd; padding: 10px 8px; text-align: left; white-space: nowrap;}
+        th { background-color: #f2f2f2; }
+
+        #drawing-bracket-preview {
+            margin-top: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .bracket-preview-box {
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #fff9f9;
+            font-size: 0.85rem;
+        }
+        .bracket-preview-box .match-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+        }
+        .bracket-preview-box .team-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .bracket-preview-box .team-row:last-child { border-bottom: none; }
+
+        .bracket-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 0;
+        }
+        .bracket {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            min-width: 700px;
+            padding-bottom: 10px;
+        }
+        .round {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+            min-width: 180px;
+        }
+        .round-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: var(--primary);
+            background: #fff3f3;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #f8d7da;
+        }
+        .match-box {
+            border: 2px solid var(--dark);
+            border-radius: 6px;
+            background: #fff;
+            padding: 8px;
+            font-size: 0.8rem;
+        }
+        .match-box .player {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 2px;
+            border-bottom: 1px solid #eee;
+        }
+        .match-box .player:last-child { border-bottom: none; }
+        .match-box .player.winner { font-weight: bold; color: var(--success); }
+        .match-box .player .score { font-weight: bold; background: #eee; padding: 0 6px; border-radius: 4px; font-size: 0.8rem;}
+        
+        .hidden { display: none; }
+        .toast { position: fixed; bottom: 20px; right: 20px; left: 20px; background: var(--dark); color: white; padding: 15px; border-radius: 5px; display: none; z-index: 10000; text-align: center; font-weight: bold;}
+        
+        /* --- MEDIA QUERIES --- */
+        @media (max-width: 480px) {
+            .domino-img { width: 42px; }
+            .kartu-1 { top: 8%; left: 3%; }
+            .kartu-2 { top: 6%; right: 3%; }
+            .kartu-3 { bottom: 6%; left: 5%; }
+            .kartu-4 { bottom: 4%; right: 4%; }
+            .intro-title { font-size: 1.3rem; }
+            .logo-container { max-width: 220px; }
+            .logo-fallback { font-size: 90px; }
+            .btn-masuk { padding: 12px 30px; font-size: 0.9rem; }
+            .btn-masuk img { width: 24px; }
+        }
+        @media (min-width: 600px) {
+            .toast { left: auto; width: auto; text-align: left; }
+            .container { padding: 25px; }
+            .btn-home { font-size: 0.9rem; padding: 10px 20px; top: 15px; left: 15px;}
+            .domino-img { width: 80px; }
+            .logo-container { max-width: 350px; }
+        }
+        @media (min-width: 900px) {
+            .domino-img { width: 95px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================
+     HALAMAN INTRO
+     ============================================ -->
+<div id="introPage">
+    <div class="particles" id="particles"></div>
+
+    <!-- 4 Kartu Domino Asli (Gambar PNG) -->
+    <img src="kartu-56.png" alt="Kartu Domino 5-6" class="domino-img kartu-1">
+    <img src="kartu-45.png" alt="Kartu Domino 4-5" class="domino-img kartu-2">
+    <img src="kartu-44.png" alt="Kartu Domino 4-4" class="domino-img kartu-3">
+    <img src="kartu-66.png" alt="Kartu Domino 6-6" class="domino-img kartu-4">
+
+    <div class="intro-content">
+        <div class="logo-container">
+            <img src="icon-pordi.png" alt="Logo PORDA Kaltim" id="logoImg" onerror="fallbackLogo()">
+            <div class="logo-fallback" id="logoFallback" style="display:none;">🎲</div>
+        </div>
+        
+        <h1 class="intro-title">TURNAMEN DOMINO</h1>
+        <h2 class="intro-subtitle">PIALA WALIKOTA SAMARINDA</h2>
+        <p class="intro-year">CUP 2026</p>
+
+        <!-- Tombol Buat Turnamen dengan icon kartu domino -->
+        <button class="btn-masuk" id="btnMasuk" type="button" onclick="masukAplikasi()">
+            <img src="kartu-66.png" alt="Kartu Domino">
+            Buat Turnamen
+        </button>
+        <p class="loading-text" id="loadingText">Memuat aplikasi...</p>
+    </div>
+</div>
+
+<!-- ============================================
+     HALAMAN APLIKASI TURNAMEN
+     ============================================ -->
+<div id="appPage">
+
+    <header class="app-header">
+        <img src="header-domino.png" alt="Header Turnamen" class="header-image" onerror="this.style.display='none'">
+        <button class="btn-home" type="button" onclick="kembaliKeIntro()">🏠 Home</button>
+    </header>
+
+    <nav class="app-nav">
+        <button onclick="showTab('tab-pendaftaran')" class="active" id="btn-tab-pendaftaran">Pendaftaran</button>
+        <button onclick="showTab('tab-drawing')" id="btn-tab-drawing">Drawing</button>
+        <button onclick="showTab('tab-skor')" id="btn-tab-skor">Input Skor</button>
+        <button onclick="showTab('tab-bracket')" id="btn-tab-bracket">Bracket Live</button>
+        <button onclick="showTab('tab-juara')" id="btn-tab-juara">Juara</button>
+    </nav>
+
+    <div class="container">
+
+        <div id="tab-pendaftaran" class="card">
+            <h2>Pendaftaran Peserta</h2>
+            <div class="form-group">
+                <label>Nama Pemain 1</label>
+                <input type="text" id="p1" placeholder="Masukkan nama pemain 1">
+            </div>
+            <div class="form-group">
+                <label>Nama Pemain 2</label>
+                <input type="text" id="p2" placeholder="Masukkan nama pemain 2">
+            </div>
+            <div class="form-group">
+                <label>Asal Klub/Daerah</label>
+                <input type="text" id="klub" placeholder="Contoh: Samarinda Seberang">
+            </div>
+            <button class="btn btn-full" onclick="daftarPeserta()">Daftarkan Tim</button>
+            <hr style="margin: 20px 0;">
+            <h3>Daftar Peserta (<span id="total-peserta">0</span> Tim)</h3>
+            <div class="table-wrapper">
+                <table id="tabel-peserta">
+                    <thead>
+                        <tr><th>No</th><th>Pemain 1</th><th>Pemain 2</th><th>Klub</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-drawing" class="card hidden">
+            <h2>Drawing & Bracket</h2>
+            <p>Pastikan peserta sudah terdaftar. Klik tombol di bawah untuk mengacak bagan pertandingan (Sistem Gugur).</p>
+            <button class="btn btn-success btn-full" onclick="generateBracket()">🎲 Generate Bracket & Drawing</button>
+            <div id="drawing-info" style="margin-top: 15px; font-weight: bold; color: var(--success);"></div>
+            <div id="drawing-bracket-preview"></div>
+        </div>
+
+        <div id="tab-skor" class="card hidden">
+            <h2>Input Skor Pertandingan</h2>
+            <div id="skor-container">
+                <p>Silakan lakukan drawing terlebih dahulu di menu <b>Drawing</b>.</p>
+            </div>
+        </div>
+
+        <div id="tab-bracket" class="card hidden">
+            <h2>Bracket Live</h2>
+            <div class="bracket-container">
+                <div class="bracket" id="bracket-display"></div>
+            </div>
+        </div>
+
+        <div id="tab-juara" class="card hidden">
+            <h2>Podium Juara</h2>
+            <div id="juara-display" style="text-align: center; padding: 20px 0;">
+                <p>Turnamen belum selesai. Selesaikan semua pertandingan.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast">Pesan</div>
+
+<script>
+    // ============================================
+    // FUNGSI HALAMAN INTRO
+    // ============================================
+    function fallbackLogo() {
+        var logoImg = document.getElementById('logoImg');
+        var logoFallback = document.getElementById('logoFallback');
+        if (logoImg) logoImg.style.display = 'none';
+        if (logoFallback) logoFallback.style.display = 'block';
+    }
+
+    (function createParticles() {
+        try {
+            var container = document.getElementById('particles');
+            if (!container) return;
+            for (var i = 0; i < 25; i++) {
+                var p = document.createElement('div');
+                p.classList.add('particle');
+                var size = Math.random() * 15 + 5;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                p.style.animationDelay = (Math.random() * 10) + 's';
+                container.appendChild(p);
+            }
+        } catch(e) { console.log('Particle error:', e); }
+    })();
+
+    function masukAplikasi() {
+        var btn = document.getElementById('btnMasuk');
+        var loading = document.getElementById('loadingText');
+        
+        if (btn) btn.style.display = 'none';
+        if (loading) {
+            loading.style.display = 'block';
+            loading.innerText = 'Menyiapkan turnamen baru...';
+        }
+
+        try {
+            localStorage.removeItem('domino_peserta');
+            localStorage.removeItem('domino_bracket');
+            localStorage.removeItem('domino_juara');
+        } catch(e) { console.log('Storage error:', e); }
+
+        peserta = [];
+        bracket = null;
+        juara = null;
+
+        var p1 = document.getElementById('p1');
+        var p2 = document.getElementById('p2');
+        var klub = document.getElementById('klub');
+        if (p1) p1.value = '';
+        if (p2) p2.value = '';
+        if (klub) klub.value = '';
+        
+        var drawingInfo = document.getElementById('drawing-info');
+        var drawingPreview = document.getElementById('drawing-bracket-preview');
+        if (drawingInfo) drawingInfo.innerText = '';
+        if (drawingPreview) drawingPreview.innerHTML = '';
+
+        setTimeout(function() {
+            var introPage = document.getElementById('introPage');
+            if (introPage) introPage.classList.add('hidden-intro');
+            
+            var appPage = document.getElementById('appPage');
+            if (appPage) appPage.classList.add('active');
+
+            window.scrollTo(0, 0);
+
+            renderPeserta();
+            renderBracket();
+            renderJuara();
+            showTab('tab-pendaftaran');
+
+            showToast('Turnamen baru siap! Silakan daftarkan peserta.');
+        }, 800);
+    }
+
+    function kembaliKeIntro() {
+        if (confirm('Kembali ke halaman intro? Semua data turnamen saat ini akan direset.')) {
+            try {
+                localStorage.removeItem('domino_peserta');
+                localStorage.removeItem('domino_bracket');
+                localStorage.removeItem('domino_juara');
+            } catch(e) { console.log(e); }
+            
+            peserta = [];
+            bracket = null;
+            juara = null;
+
+            var appPage = document.getElementById('appPage');
+            if (appPage) appPage.classList.remove('active');
+            
+            var introPage = document.getElementById('introPage');
+            if (introPage) introPage.classList.remove('hidden-intro');
+
+            var btn = document.getElementById('btnMasuk');
+            var loading = document.getElementById('loadingText');
+            if (btn) btn.style.display = 'inline-flex';
+            if (loading) loading.style.display = 'none';
+
+            window.scrollTo(0, 0);
+        }
+    }
+
+    // ============================================
+    // FUNGSI APLIKASI TURNAMEN
+    // ============================================
+    var peserta = JSON.parse(localStorage.getItem('domino_peserta')) || [];
+    var bracket = JSON.parse(localStorage.getItem('domino_bracket')) || null;
+    var juara = JSON.parse(localStorage.getItem('domino_juara')) || null;
+
+    function showToast(msg) {
+        var t = document.getElementById('toast');
+        if (!t) return;
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 3000);
+    }
+
+    function saveData() {
+        try {
+            localStorage.setItem('domino_peserta', JSON.stringify(peserta));
+            localStorage.setItem('domino_bracket', JSON.stringify(bracket));
+            localStorage.setItem('domino_juara', JSON.stringify(juara));
+        } catch(e) { console.log('Save error:', e); }
+    }
+
+    function showTab(tabId) {
+        document.querySelectorAll('.card').forEach(function(el) { el.classList.add('hidden'); });
+        var target = document.getElementById(tabId);
+        if (target) target.classList.remove('hidden');
+        
+        document.querySelectorAll('nav.app-nav button').forEach(function(btn) { btn.classList.remove('active'); });
+        var btn = document.getElementById('btn-' + tabId);
+        if (btn) btn.classList.add('active');
+
+        if (tabId === 'tab-skor') renderInputSkor();
+        if (tabId === 'tab-bracket') renderBracket();
+        if (tabId === 'tab-juara') renderJuara();
+        if (tabId === 'tab-drawing') renderDrawingPreview();
+    }
+
+    function daftarPeserta() {
+        var p1 = document.getElementById('p1').value.trim();
+        var p2 = document.getElementById('p2').value.trim();
+        var klub = document.getElementById('klub').value.trim();
+
+        if (!p1 || !p2 || !klub) {
+            showToast('Harap isi semua data pemain!');
+            return;
+        }
+
+        var timBaru = { id: Date.now(), p1: p1, p2: p2, klub: klub };
+        peserta.push(timBaru);
+        saveData();
+        renderPeserta();
+        
+        document.getElementById('p1').value = '';
+        document.getElementById('p2').value = '';
+        document.getElementById('klub').value = '';
+        showToast('Tim berhasil didaftarkan!');
+    }
+
+    function renderPeserta() {
+        var tbody = document.querySelector('#tabel-peserta tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        peserta.forEach(function(p, index) {
+            tbody.innerHTML += '<tr><td>' + (index + 1) + '</td><td>' + p.p1 + '</td><td>' + p.p2 + '</td><td>' + p.klub + '</td></tr>';
+        });
+        var totalEl = document.getElementById('total-peserta');
+        if (totalEl) totalEl.innerText = peserta.length;
+    }
+
+    function generateBracket() {
+        if (peserta.length < 2) {
+            showToast('Minimal butuh 2 tim untuk melakukan drawing!');
+            return;
+        }
+
+        var shuffled = peserta.slice();
+        for (var i = shuffled.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = shuffled[i];
+            shuffled[i] = shuffled[j];
+            shuffled[j] = temp;
+        }
+
+        var totalSlots = 2;
+        while (totalSlots < shuffled.length) totalSlots *= 2;
+
+        var slots = shuffled.slice();
+        while (slots.length < totalSlots) {
+            slots.push({ id: null, p1: 'BYE', p2: '', klub: 'Lolos Otomatis' });
+        }
+
+        var rounds = [];
+        var firstRoundMatches = [];
+        for (var k = 0; k < slots.length; k += 2) {
+            firstRoundMatches.push({
+                id: 'M' + (k/2 + 1),
+                team1: slots[k], team2: slots[k+1],
+                score1: 0, score2: 0, winner: null, status: 'pending'
+            });
+        }
+        rounds.push({ name: 'Babak 1', matches: firstRoundMatches });
+
+        var numMatches = firstRoundMatches.length / 2;
+        var roundNum = 2;
+        while (numMatches >= 1) {
+            var nextRoundMatches = [];
+            for (var m = 0; m < numMatches; m++) {
+                nextRoundMatches.push({
+                    id: 'M' + roundNum + '-' + (m+1),
+                    team1: null, team2: null,
+                    score1: 0, score2: 0, winner: null, status: 'pending'
+                });
+            }
+            rounds.push({ name: numMatches === 1 ? 'Final' : 'Babak ' + roundNum, matches: nextRoundMatches });
+            numMatches = Math.floor(numMatches / 2);
+            roundNum++;
+        }
+
+        bracket = { rounds: rounds, currentRoundIndex: 0 };
+        juara = null;
+        saveData();
+        
+        var infoEl = document.getElementById('drawing-info');
+        if (infoEl) infoEl.innerText = 'Drawing berhasil! Total ' + peserta.length + ' tim telah diacak.';
+        showToast('Bracket berhasil dibuat!');
+        renderDrawingPreview();
+    }
+
+    function renderDrawingPreview() {
+        var container = document.getElementById('drawing-bracket-preview');
+        if (!container) return;
+        if (!bracket) { container.innerHTML = ''; return; }
+
+        var html = '<h3 style="margin-top:20px; color:var(--primary);">Preview Bagan Pertandingan:</h3>';
+        html += '<div style="display:flex; flex-direction:column; gap:10px;">';
+        
+        bracket.rounds.forEach(function(round) {
+            html += '<h4 style="margin: 5px 0; color: #555;">' + round.name + '</h4>';
+            round.matches.forEach(function(match) {
+                var t1 = match.team1 ? match.team1.p1 + ' / ' + match.team1.p2 : 'TBD';
+                var t2 = match.team2 ? match.team2.p1 + ' / ' + match.team2.p2 : 'TBD';
+                if (match.team1 && match.team1.p1 === 'BYE') t1 = '--- BYE ---';
+                if (match.team2 && match.team2.p1 === 'BYE') t2 = '--- BYE ---';
+
+                html += '<div class="bracket-preview-box">' +
+                    '<div class="match-title">' + match.id + '</div>' +
+                    '<div class="team-row"><span>' + t1 + '</span> <span>' + match.score1 + '</span></div>' +
+                    '<div class="team-row"><span>' + t2 + '</span> <span>' + match.score2 + '</span></div>' +
+                '</div>';
+            });
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function renderInputSkor() {
+        var container = document.getElementById('skor-container');
+        if (!container) return;
+        if (!bracket) {
+            container.innerHTML = '<p>Silakan lakukan drawing terlebih dahulu di menu <b>Drawing</b>.</p>';
+            return;
+        }
+
+        var html = '';
+        var matchFound = false;
+
+        bracket.rounds.forEach(function(round) {
+            round.matches.forEach(function(match) {
+                if (match.team1 && match.team2 && match.status === 'pending' && match.team1.p1 !== 'BYE' && match.team2.p1 !== 'BYE') {
+                    matchFound = true;
+                    html += '<div class="match-box" style="margin-bottom: 15px; border-color: var(--primary); padding: 15px;">' +
+                        '<div style="font-size: 0.8rem; background: #eee; padding: 5px; margin: -15px -15px 10px -15px; border-radius: 6px 6px 0 0; font-weight: bold;">' +
+                            round.name + ' - ' + match.id +
+                        '</div>' +
+                        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px;">' +
+                            '<span style="font-size:0.85rem; flex:1;">' + match.team1.p1 + ' / ' + match.team1.p2 + ' <br><small>(' + match.team1.klub + ')</small></span>' +
+                            '<input type="number" id="s1-' + match.id + '" value="' + match.score1 + '" style="width: 60px; padding: 8px; text-align:center; font-size:1rem; border:1px solid #ccc; border-radius:4px;">' +
+                        '</div>' +
+                        '<div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">' +
+                            '<span style="font-size:0.85rem; flex:1;">' + match.team2.p1 + ' / ' + match.team2.p2 + ' <br><small>(' + match.team2.klub + ')</small></span>' +
+                            '<input type="number" id="s2-' + match.id + '" value="' + match.score2 + '" style="width: 60px; padding: 8px; text-align:center; font-size:1rem; border:1px solid #ccc; border-radius:4px;">' +
+                        '</div>' +
+                        '<button class="btn btn-success" style="margin-top:15px; width:100%;" onclick="simpanSkor(\'' + match.id + '\', \'' + round.name + '\')">Simpan Skor</button>' +
+                    '</div>';
+                }
+            });
+        });
+
+        if (!matchFound) {
+            html = '<p style="color: var(--success); font-weight:bold;">Semua pertandingan di babak ini sudah selesai! Silakan cek Bracket Live.</p>';
+        }
+        container.innerHTML = html;
+    }
+
+    function simpanSkor(matchId, roundName) {
+        var s1 = parseInt(document.getElementById('s1-' + matchId).value);
+        var s2 = parseInt(document.getElementById('s2-' + matchId).value);
+
+        if (isNaN(s1) || isNaN(s2)) { showToast('Skor harus berupa angka!'); return; }
+        if (s1 === s2) { showToast('Turnamen domino tidak boleh seri!'); return; }
+
+        var roundIdx = -1;
+        for (var i = 0; i < bracket.rounds.length; i++) {
+            if (bracket.rounds[i].name === roundName) { roundIdx = i; break; }
+        }
+        var matchIdx = -1;
+        for (var j = 0; j < bracket.rounds[roundIdx].matches.length; j++) {
+            if (bracket.rounds[roundIdx].matches[j].id === matchId) { matchIdx = j; break; }
+        }
+        var match = bracket.rounds[roundIdx].matches[matchIdx];
+
+        match.score1 = s1;
+        match.score2 = s2;
+        match.status = 'selesai';
+        match.winner = s1 > s2 ? match.team1 : match.team2;
+
+        if (roundIdx + 1 < bracket.rounds.length) {
+            var nextRound = bracket.rounds[roundIdx + 1];
+            var nextMatchIndex = Math.floor(matchIdx / 2);
+            var nextMatch = nextRound.matches[nextMatchIndex];
+
+            if (matchIdx % 2 === 0) nextMatch.team1 = match.winner;
+            else nextMatch.team2 = match.winner;
+            
+            if (nextMatch.team1 && nextMatch.team2 && nextMatch.team1.p1 === 'BYE') {
+                nextMatch.winner = nextMatch.team2;
+                nextMatch.status = 'selesai';
+                updateNextRound(nextRound.matches.indexOf(nextMatch), roundIdx + 1);
+            } else if (nextMatch.team1 && nextMatch.team2 && nextMatch.team2.p1 === 'BYE') {
+                nextMatch.winner = nextMatch.team1;
+                nextMatch.status = 'selesai';
+                updateNextRound(nextRound.matches.indexOf(nextMatch), roundIdx + 1);
+            }
+        } else {
+            tentukanJuara(match);
+        }
+
+        saveData();
+        renderInputSkor();
+        showToast('Skor berhasil disimpan!');
+    }
+
+    function updateNextRound(matchIdx, roundIdx) {
+        var match = bracket.rounds[roundIdx].matches[matchIdx];
+        if (roundIdx + 1 < bracket.rounds.length) {
+            var nextMatchIndex = Math.floor(matchIdx / 2);
+            var nextMatch = bracket.rounds[roundIdx + 1].matches[nextMatchIndex];
+            if (matchIdx % 2 === 0) nextMatch.team1 = match.winner;
+            else nextMatch.team2 = match.winner;
+            
+            if (nextMatch.team1 && nextMatch.team2 && nextMatch.team1.p1 === 'BYE') {
+                nextMatch.winner = nextMatch.team2; nextMatch.status = 'selesai';
+                updateNextRound(nextMatchIndex, roundIdx + 1);
+            } else if (nextMatch.team1 && nextMatch.team2 && nextMatch.team2.p1 === 'BYE') {
+                nextMatch.winner = nextMatch.team1; nextMatch.status = 'selesai';
+                updateNextRound(nextMatchIndex, roundIdx + 1);
+            }
+        } else {
+            tentukanJuara(match);
+        }
+    }
+
+    function renderBracket() {
+        var container = document.getElementById('bracket-display');
+        if (!container) return;
+        if (!bracket) { container.innerHTML = '<p>Bracket belum dibuat. Silakan lakukan drawing.</p>'; return; }
+
+        var html = '';
+        bracket.rounds.forEach(function(round) {
+            html += '<div class="round">';
+            html += '<div class="round-title">' + round.name + '</div>';
+            
+            round.matches.forEach(function(match) {
+                var t1Name = match.team1 ? match.team1.p1 + ' / ' + match.team1.p2 : 'TBD';
+                var t2Name = match.team2 ? match.team2.p1 + ' / ' + match.team2.p2 : 'TBD';
+                if (match.team1 && match.team1.p1 === 'BYE') t1Name = '--- BYE ---';
+                if (match.team2 && match.team2.p1 === 'BYE') t2Name = '--- BYE ---';
+
+                var t1Class = (match.winner && match.team1 && match.winner.id === match.team1.id) ? 'winner' : '';
+                var t2Class = (match.winner && match.team2 && match.winner.id === match.team2.id) ? 'winner' : '';
+
+                html += '<div class="match-box">' +
+                    '<div class="player ' + t1Class + '"><span>' + t1Name + '</span><span class="score">' + (match.status === 'selesai' ? match.score1 : '-') + '</span></div>' +
+                    '<div class="player ' + t2Class + '"><span>' + t2Name + '</span><span class="score">' + (match.status === 'selesai' ? match.score2 : '-') + '</span></div>' +
+                '</div>';
+            });
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function tentukanJuara(finalMatch) {
+        var juara1 = finalMatch.winner;
+        var juara2 = (finalMatch.winner.id === finalMatch.team1.id) ? finalMatch.team2 : finalMatch.team1;
+        
+        var juara3 = null;
+        if (bracket.rounds.length >= 2) {
+            var semiFinalRound = bracket.rounds[bracket.rounds.length - 2];
+            var losers = [];
+            semiFinalRound.matches.forEach(function(m) {
+                if (m.winner && m.team1 && m.team2) {
+                    losers.push(m.winner.id === m.team1.id ? m.team2 : m.team1);
+                }
+            });
+            juara3 = losers[0] || null; 
+        }
+
+        juara = { juara1: juara1, juara2: juara2, juara3: juara3 };
+        saveData();
+    }
+
+    function renderJuara() {
+        var container = document.getElementById('juara-display');
+        if (!container) return;
+        if (!juara || !juara.juara1) {
+            container.innerHTML = '<p>Turnamen belum selesai. Selesaikan semua pertandingan di menu Input Skor.</p>';
+            return;
+        }
+
+        container.innerHTML = 
+            '<div style="background: gold; padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 3px solid #ffc107;">' +
+                '<h3 style="margin:0; color: #333;">🥇 JUARA 1</h3>' +
+                '<h2 style="margin: 10px 0; color: #d32f2f; font-size:1.3rem;">' + juara.juara1.p1 + ' / ' + juara.juara1.p2 + '</h2>' +
+                '<p style="margin:0; font-weight:bold;">' + juara.juara1.klub + '</p>' +
+            '</div>' +
+            '<div style="background: silver; padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 3px solid #b0bec5;">' +
+                '<h3 style="margin:0; color: #333;">🥈 JUARA 2</h3>' +
+                '<h2 style="margin: 10px 0; color: #d32f2f; font-size:1.3rem;">' + juara.juara2.p1 + ' / ' + juara.juara2.p2 + '</h2>' +
+                '<p style="margin:0; font-weight:bold;">' + juara.juara2.klub + '</p>' +
+            '</div>' +
+            '<div style="background: #cd7f32; padding: 20px; border-radius: 10px; border: 3px solid #a0522d; color: white;">' +
+                '<h3 style="margin:0;">🥉 JUARA 3</h3>' +
+                '<h2 style="margin: 10px 0; font-size:1.3rem;">' + (juara.juara3 ? juara.juara3.p1 + ' / ' + juara.juara3.p2 : 'Tidak Ada') + '</h2>' +
+                '<p style="margin:0; font-weight:bold;">' + (juara.juara3 ? juara.juara3.klub : '-') + '</p>' +
+            '</div>';
+    }
+
+    window.addEventListener('load', function() {
+        var appPage = document.getElementById('appPage');
+        if (appPage) appPage.classList.remove('active');
+        
+        renderPeserta();
+        if (bracket) {
+            var infoEl = document.getElementById('drawing-info');
+            if (infoEl) infoEl.innerText = 'Bracket sudah pernah dibuat.';
+            renderDrawingPreview();
+        }
+    });
+</script>
+</body>
+  </html>
